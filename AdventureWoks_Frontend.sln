@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35514.174 d17.12
+VisualStudioVersion = 17.12.35514.174
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdventureWoks_Frontend", "AdventureWoks_Frontend\AdventureWoks_Frontend.csproj", "{C3790330-889D-496D-B9F0-9B6CC2EB24E0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdventureWorks_Frontend", "AdventureWoks_Frontend\AdventureWorks_Frontend.csproj", "{C3790330-889D-496D-B9F0-9B6CC2EB24E0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

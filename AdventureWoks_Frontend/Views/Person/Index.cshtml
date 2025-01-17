@@ -1,0 +1,96 @@
+﻿@model PaginatedList<AdventureWoks_Frontend.Models.Person>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5 px-2">
+    <div class="card shadow-sm" style="max-width: auto; margin: 0 auto;">
+        <div class="mb-2 d-flex justify-content-between align-items-center">
+        </div>
+        <div class="card-body">
+            <h4 class="card-title">Basic Striped Table</h4>
+            <p class="card-description">
+                Basic stripped table example
+            </p>
+            <div class="position-relative">
+                <span class="position-absolute search"><i class="fa fa-search"></i></span>
+                <input class="form-control w-100" placeholder="Search by name...">
+                <div class="col-6 offset-3">
+                    <form asp-controller="Cost" asp-action="Index" method="get" class="my-2 mx-2">
+                        <div class="input-group">
+                            <select class="form-select" id="inputSearch" name="searchby">
+                                <option selected value="">Search by...</option>
+                                <option value="comment">Comment</option>
+                                <option value="category">Category</option>
+                            </select>
+                            <input name="searchfor" class="form-control" id="inputSearch" aria-describedby="inputSearchComment" aria-label="Search">
+                            <button class="btn btn-outline-secondary" type="submit" id="inputSearch">Search</button>
+                            <a class="btn btn-outline-primary" type="button" asp-controller="cost" asp-action="index">Clear Search</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="table table-responsive table-hover">
+                <table class="table table-responsive table-borderless">
+
+                    <thead>
+                        <tr class="bg-light">
+                            <th scope="col" width="10%"></th>
+                            <th scope="col" width="10%">Title</th>
+                            <th scope="col" width="20%">First Name</th>
+                            <th scope="col" width="10%">Middle Name</th>
+                            <th scope="col" width="20%">Last Name</th>
+                            <th scope="col" width="5%">Suffix</th>
+                            <th scope="col" width="10%">PersonType</th>
+                            <th scope="col" width="15%"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                @{
+                                    string imagePath = "https://randomuser.me/api/portraits/men/" + item.BusinessEntityId + ".jpg";
+                                }
+                                <td><img src="@imagePath" width="25" alt="@item.FirstName" data-bs-toggle="tooltip" title="@item.FirstName"></td>
+                                <td>@item.Title</td>
+                                <td>@item.FirstName</td>
+                                <td>@item.MiddleName</td>
+                                <td> @item.LastName</td>
+                                <td>@item.Suffix</td>
+                                <td>@item.PersonType</td>
+                                <td>
+                                    @Html.ActionLink("Edit", "Edit", new { id = item.BusinessEntityId }) |
+                                    @Html.ActionLink("Details", "Details", new { id = item.BusinessEntityId }) |
+                                    @Html.ActionLink("Delete", "Delete", new { id = item.BusinessEntityId })
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            @{
+                var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+                var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+            }
+
+            <a asp-action="Index"
+               asp-route-sortOrder="@ViewData["CurrentSort"]"
+               asp-route-pageNumber="@(Model.PageIndex - 1)"
+               asp-route-currentFilter="@ViewData["CurrentFilter"]"
+               class="btn btn-default @prevDisabled">
+                Previous
+            </a>
+            <a asp-action="Index"
+               asp-route-sortOrder="@ViewData["CurrentSort"]"
+               asp-route-pageNumber="@(Model.PageIndex + 1)"
+               asp-route-currentFilter="@ViewData["CurrentFilter"]"
+               class="btn btn-default @nextDisabled">
+                Next
+            </a>
+        </div>
+
+    </div>
+</div>
