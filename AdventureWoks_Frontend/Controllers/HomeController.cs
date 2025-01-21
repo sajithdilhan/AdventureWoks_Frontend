@@ -2,7 +2,7 @@ using System.Diagnostics;
 using AdventureWoks_Frontend.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AdventureWoks_Frontend.Controllers
+namespace AdventureWorks_Frontend.Controllers
 {
     public class HomeController : Controller
     {

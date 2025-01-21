@@ -1,103 +1,74 @@
-﻿using AdventureWoks_Frontend.Models;
+﻿using System.Net.Http.Headers;
+using AdventureWoks_Frontend.Models;
 using Newtonsoft.Json;
-using System.Net.Http.Headers;
+using ILogger = Serilog.ILogger;
 
-namespace AdventureWoks_Frontend.Services
+namespace AdventureWorks_Frontend.Services;
+
+public class PersonService(IConfiguration configuration, ITokenService tokenService, ILogger logger) : IPersonService
 {
-    public class PersonService : IPersonService
+    public Task<Person> CreatePersonAsync(Person person)
     {
-        ILogger<PersonService> _logger;
-        IConfiguration _configuration;
+        throw new NotImplementedException();
+    }
 
-        public PersonService(ILogger<PersonService> logger, IConfiguration configuration)
+    public Task DeletePersonAsync(int id)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<Person> GetPersonAsync(int id)
+    {
+        string baseUrl = configuration.GetValue<string>("AdventureWorksApiBaseUrl") ?? string.Empty;
+        var token = await tokenService.GetTokenAsync();
+        using var client = new HttpClient();
+        client.BaseAddress = new Uri(baseUrl);
+        client.BaseAddress = new Uri(baseUrl);
+        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var response = await client.GetAsync($"api/Person/{id}");
+        response.EnsureSuccessStatusCode();
+            
+        var json = await response.Content.ReadFromJsonAsync<Person>();
+        logger.Debug($"Received success response for GetPerson Id :{id}, Content:{JsonConvert.SerializeObject(json)}");
+        return json ?? new Person();
+    }
+
+    public async Task<(IEnumerable<Person>, int)> GetPersonsAsync(int pageNumber, int pageSize)
+    {
+        try
         {
-            _logger = logger;
-            _configuration = configuration;
-        }
+            string baseUrl = configuration.GetValue<string>("AdventureWorksApiBaseUrl") ?? string.Empty;
+            using HttpClient client = new HttpClient();
+            var token = await tokenService.GetTokenAsync();
+            client.BaseAddress = new Uri(baseUrl);
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            var response = await client.GetAsync($"api/Person?PageSize={pageSize}&PageNumber={pageNumber}");
+            response.EnsureSuccessStatusCode();
 
-        public Task<Person> CreatePersonAsync(Person person)
+            var json = await response.Content.ReadFromJsonAsync<ApiResponse>();
+            return json is { Data.Persons.Count: > 0 } ? (json.Data.Persons, json.MetaData?.Total ?? 0) : ([], 0);
+        }
+        catch (HttpRequestException ux)
         {
-            throw new NotImplementedException();
-        }
+            logger.Error(ux,
+                ux.StatusCode == System.Net.HttpStatusCode.Unauthorized
+                    ? "Unauthorized access"
+                    : $"Unexpected result:{ux.StatusCode}, {ux.Message}");
 
-        public Task DeletePersonAsync(int id)
+            return ([], 0);
+        }
+        catch (Exception ex)
         {
-            throw new NotImplementedException();
+            logger.Error(ex, "Failed to get persons");
+            return ([], 0);
         }
-
-        public async Task<Person> GetPersonAsync(int id)
-        {
-            try
-            {
-                string baseUrl = _configuration.GetValue<string>("AdventureWorksApiBaseUrl") ?? string.Empty;
-                using (var client = new HttpClient())
-                {
-                    client.BaseAddress = new Uri(baseUrl);
-                    client.DefaultRequestHeaders.Accept.Clear();
-                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    var response = await client.GetAsync($"api/Person/{id}");
-
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var json = await response.Content.ReadFromJsonAsync<Person>();
-                        return json ?? new Person();
-                    }
-                    else
-                    {
-                        _logger.LogError("Failed to get persons: {StatusCode} {Reason}", response.StatusCode, response.ReasonPhrase);
-                        return new Person();
-                    }
-                }
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-        }
-
-        public async Task<IEnumerable<Person>> GetPersonsAsync(int pageNumber, int pageSize)
-        {
-            try
-            {
-                string baseUrl = _configuration.GetValue<string>("AdventureWorksApiBaseUrl") ?? string.Empty;
-
-                using (HttpClient client = new HttpClient())
-                {
-                    client.BaseAddress = new Uri(baseUrl);
-                    client.DefaultRequestHeaders.Accept.Clear();
-                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    var response = await client.GetAsync($"api/Person?PageSize={pageSize}&PageNumber={pageNumber}");
-
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var json = await response.Content.ReadFromJsonAsync<ApiResponse>();
-                        if (json != null && json.Data?.Persons?.Count > 0)
-                        {
-                            return json.Data.Persons;
-                        }
-                        else
-                        {
-                            return Enumerable.Empty<Person>();
-                        }
-                    }
-                    else
-                    {
-                        _logger.LogError("Failed to get persons: {StatusCode} {Reason}", response.StatusCode, response.ReasonPhrase);
-                        return Enumerable.Empty<Person>();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to get persons");
-                return Enumerable.Empty<Person>();
-            }
-
-        }
-        public Task<Person> UpdatePersonAsync(int id, Person person)
-        {
-            throw new NotImplementedException();
-        }
+    }
+    public Task<Person> UpdatePersonAsync(int id, Person person)
+    {
+        throw new NotImplementedException();
     }
 }

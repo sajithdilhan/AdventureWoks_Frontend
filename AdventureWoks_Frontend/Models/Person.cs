@@ -5,9 +5,6 @@ namespace AdventureWoks_Frontend.Models
 {
     public class ApiResponse
     {
-        [JsonPropertyName("$id")]
-        public string? Id { get; set; }
-
         public Data? Data { get; set; }
 
         public MetaData? MetaData { get; set; }
@@ -15,18 +12,12 @@ namespace AdventureWoks_Frontend.Models
 
     public class Data
     {
-        [JsonPropertyName("$id")]
-        public string? Id { get; set; }
-
         [JsonPropertyName("$values")]
         public List<Person>? Persons { get; set; }
     }
 
     public class Person
     {
-        [JsonPropertyName("$id")]
-        public string? Id { get; set; }
-
         public int BusinessEntityId { get; set; }
 
         [Required]
@@ -63,27 +54,18 @@ namespace AdventureWoks_Frontend.Models
 
     public class EmailAddresses
     {
-        [JsonPropertyName("$id")]
-        public string? Id { get; set; }
-
         [JsonPropertyName("$values")]
         public List<string>? EmailAddress { get; set; }
     }
 
     public class PhoneNumbers
     {
-        [JsonPropertyName("$id")]
-        public string? Id { get; set; }
-
         [JsonPropertyName("$values")]
         public List<string>? PhoneNumber { get; set; }
     }
 
     public class MetaData
     {
-        [JsonPropertyName("$id")]
-        public int Id { get; set; }
-
         public int Total { get; set; }
 
         public int PageIndex { get; set; }
@@ -93,4 +75,9 @@ namespace AdventureWoks_Frontend.Models
         public int PageCount { get; set; }
     }
 
+    public class TokenResponse
+    {
+        [JsonPropertyName("token")]
+        public string? Token { get; set; }
+    }
 }

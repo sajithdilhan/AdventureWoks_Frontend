@@ -1,28 +1,20 @@
 ﻿using AdventureWoks_Frontend.Models;
-using AdventureWoks_Frontend.Services;
+using AdventureWorks_Frontend.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AdventureWoks_Frontend.Controllers
+namespace AdventureWorks_Frontend.Controllers
 {
-    public class PersonController : Controller
+    public class PersonController(IPersonService personService) : Controller
     {
         // GET: PersonController
-
-        private readonly IPersonService _personService;
-
-        public PersonController(IPersonService personService)
-        {
-            _personService = personService;
-        }
-
         public async Task<ActionResult> Index(string sortOrder, string currentFilter, string searchString, int? pageNumber)
         {
             ViewData["CurrentSort"] = sortOrder;
-            ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
-            ViewData["DateSortParm"] = sortOrder == "Date" ? "date_desc" : "Date";
+            ViewData["NameSortParm"] = string.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewData["DateSortParm"] = sortOrder == "Date" ? "date_desc" : "Date"; 
             if (searchString != null)
             {
-                pageNumber = 1;
+                pageNumber = 0;
             }
             else
             {
@@ -32,15 +24,15 @@ namespace AdventureWoks_Frontend.Controllers
             ViewData["CurrentFilter"] = searchString;
 
             int pageSize = 10;
-            var persons = await _personService.GetPersonsAsync(pageNumber ?? 1, pageSize);
+            (IEnumerable<Person> persons, int total) = await personService.GetPersonsAsync(pageNumber ?? 0, pageSize);
 
-            return View(PaginatedList<Person>.Create(persons, pageNumber ?? 1, pageSize));
+            return View(PaginatedList<Person>.Create(persons, pageNumber ?? 0, pageSize, total));
         }
 
         // GET: PersonController/Details/5
         public async Task<ActionResult> Details(int id)
         {
-            var person = await _personService.GetPersonAsync(id);
+            var person = await personService.GetPersonAsync(id);
             return View(person);
         }
 
