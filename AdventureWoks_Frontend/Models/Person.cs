@@ -47,6 +47,8 @@ namespace AdventureWoks_Frontend.Models
         [DataType(DataType.Date)]
         public DateTime ModifiedDate { get; set; }
 
+        public string? Gender { get; set; }
+
         public EmailAddresses? EmailAddresses { get; set; }
 
         public PhoneNumbers? PhoneNumbers { get; set; }

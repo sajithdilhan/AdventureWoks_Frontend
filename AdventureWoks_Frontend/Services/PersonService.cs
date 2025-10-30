@@ -5,7 +5,7 @@ using ILogger = Serilog.ILogger;
 
 namespace AdventureWorks_Frontend.Services;
 
-public class PersonService(IConfiguration configuration, ITokenService tokenService, ILogger logger) : IPersonService
+public class PersonService(ITokenService tokenService, ILogger logger, IHttpClientFactory _httpClientFactory) : IPersonService
 {
     public Task<Person> CreatePersonAsync(Person person)
     {
@@ -19,12 +19,8 @@ public class PersonService(IConfiguration configuration, ITokenService tokenServ
 
     public async Task<Person> GetPersonAsync(int id)
     {
-        string baseUrl = configuration.GetValue<string>("AdventureWorksApiBaseUrl") ?? string.Empty;
         var token = await tokenService.GetTokenAsync();
-        using var client = new HttpClient();
-        client.BaseAddress = new Uri(baseUrl);
-        client.BaseAddress = new Uri(baseUrl);
-        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        var client = _httpClientFactory.CreateClient("AdventureServiceClient");
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         var response = await client.GetAsync($"api/Person/{id}");
@@ -39,13 +35,10 @@ public class PersonService(IConfiguration configuration, ITokenService tokenServ
     {
         try
         {
-            string baseUrl = configuration.GetValue<string>("AdventureWorksApiBaseUrl") ?? string.Empty;
-            using HttpClient client = new HttpClient();
             var token = await tokenService.GetTokenAsync();
-            client.BaseAddress = new Uri(baseUrl);
-            client.DefaultRequestHeaders.Accept.Clear();
+            var client = _httpClientFactory.CreateClient("AdventureServiceClient");
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
             var response = await client.GetAsync($"api/Person?PageSize={pageSize}&PageNumber={pageNumber}");
             response.EnsureSuccessStatusCode();
 

@@ -17,7 +17,8 @@ else
             <div class="row g-0">
                 <div class="col-md-4 p-3 text-center">
                     @{
-                        string imagePath = "https://randomuser.me/api/portraits/men/" + Model.BusinessEntityId + ".jpg";
+                        string gender = Model.Gender?.Trim() == "M" ? "men" : "women";
+                        string imagePath = $"https://randomuser.me/api/portraits/{gender}/{Model.BusinessEntityId % 99}.jpg";
                     }
                     <img src="@imagePath" class="rounded-circle img-thumbnail" alt="Profile Picture">
                     <div class="mt-2">

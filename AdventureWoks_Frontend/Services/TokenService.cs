@@ -2,33 +2,30 @@
 using Serilog;
 using System.Net.Http.Headers;
 using System.Text.Json;
+using ILogger = Serilog.ILogger;
 
 namespace AdventureWorks_Frontend.Services;
 
-public class TokenService : ITokenService
+public class TokenService(IConfiguration configuration, ILogger logger) : ITokenService
 {
     private readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
     private DateTime _expiryTime;
     private string _token = string.Empty;
-    private IConfiguration _configurationManager;
 
-    public TokenService(IConfiguration configurationManager)
-    {
-        _configurationManager = configurationManager;
-    }
-    public async Task<string> GetTokenAsync()
+    public async Task<string> GetTokenAsync() 
     {
         if (string.IsNullOrEmpty(_token) || _expiryTime < DateTime.UtcNow)
         {
             await _semaphoreSlim.WaitAsync();
             try
             {
+                logger.Debug("Aquiring token from API..");
                 if (!string.IsNullOrEmpty(_token) && _expiryTime >= DateTime.UtcNow)
                 {
                     return _token;
                 }
 
-                var credentials = _configurationManager.GetRequiredSection("BackendCredentials");
+                var credentials = configuration.GetRequiredSection("BackendCredentials");
                 if (credentials == null)
                 {
                     Log.Error("Error reading API credentials");
@@ -43,7 +40,7 @@ public class TokenService : ITokenService
 
                 using (var client = new HttpClient())
                 {
-                    string baseUrl = _configurationManager.GetValue<string>("AdventureWorksApiBaseUrl") ?? string.Empty;
+                    string baseUrl = configuration.GetValue<string>("AdventureWorksApiBaseUrl") ?? string.Empty;
                     client.BaseAddress = new Uri(baseUrl);
                     client.DefaultRequestHeaders.Accept.Clear();
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -56,6 +53,7 @@ public class TokenService : ITokenService
                     {
                         _token = result.Token;
                         _expiryTime = DateTime.UtcNow.AddMinutes(2);
+                        logger.Debug("TOken aquired from API and will be expired on {expiry}", _expiryTime);
                     }
                 }
             }

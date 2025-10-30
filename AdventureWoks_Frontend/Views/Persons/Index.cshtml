@@ -1,0 +1,158 @@
+﻿@model PaginatedList<AdventureWoks_Frontend.Models.Person>
+
+@{
+    ViewData["Title"] = "People";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container">
+    <div class="card border-0 shadow-lg rounded-4">
+        <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center px-4 pt-4">
+            <div>
+                <h3 class="fw-bold mb-0">People Directory</h3>
+                <small class="text-muted">List of registered persons in the system</small>
+            </div>
+            <a asp-action="Create" class="btn btn-primary rounded-pill px-4">+ Add New</a>
+        </div>
+
+        <div class="card-body px-4">
+            <form asp-action="Index" method="get" class="mb-4">
+                <div class="input-group shadow-sm rounded-pill overflow-hidden">
+                    <input type="text" name="searchfor" class="form-control border-0 ps-4"
+                           placeholder="🔍 Search by name...">
+                    <button class="btn btn-primary rounded-end-pill px-4" type="submit">Search</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary rounded-end-pill px-4">Clear</a>
+                </div>
+            </form>
+
+            <div class="table-responsive">
+                <table class="table align-middle table-hover">
+                    <thead class="table-light text-secondary">
+                        <tr>
+                            <th></th>
+                            <th>Title</th>
+                            <th>First Name</th>
+                            <th>Middle Name</th>
+                            <th>Last Name</th>
+                            <th>Phone</th>
+                            <th>Person Type</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            
+                                // If your Person model doesn't have Gender, remove these two lines
+                                var gender = (item.GetType().GetProperty("Gender")?.GetValue(item)?.ToString() ?? "") == "M" ? "men" : "women";
+                                // safe modulus in case BusinessEntityId is large/zero
+                                var picId = (item.BusinessEntityId == 0) ? 1 : (item.BusinessEntityId % 99);
+                                var imagePath = $"https://randomuser.me/api/portraits/{gender}/{picId}.jpg";
+                            
+                            <tr class="border-bottom">
+                                <td>
+                                    <a asp-action="Details" asp-route-id="@item.BusinessEntityId" class="">
+                                        <img src="@imagePath" width="40" height="40"
+                                             class="rounded-circle shadow-sm"
+                                             alt="@item.FirstName" />
+                                    </a>
+                                </td>
+                                <td>@item.Title</td>
+                                <td class="fw-semibold">@item.FirstName</td>
+                                <td>@item.MiddleName</td>
+                                <td>@item.LastName</td>
+                                <td>@item.PhoneNumbers?.PhoneNumber?.FirstOrDefault()</td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">@item.PersonType</span>
+                                </td>
+                                <td class="text-end">
+                                    <!-- Kebab (three dots) dropdown -->
+                                    <div class="dropdown d-inline-block">
+                                        <button class="btn btn-sm btn-link text-secondary p-0" type="button"
+                                                id="actionsMenu-@item.BusinessEntityId"
+                                                data-bs-toggle="dropdown" aria-expanded="false"
+                                                aria-label="Actions for @item.FirstName">
+                                            <i class="bi bi-three-dots-vertical fs-5"></i>
+                                        </button>
+
+                                        <ul class="dropdown-menu dropdown-menu-end shadow-sm"
+                                            aria-labelledby="actionsMenu-@item.BusinessEntityId">
+                                            <li>
+                                                <a class="dropdown-item" asp-action="Details" asp-route-id="@item.BusinessEntityId">
+                                                    <i class="bi bi-info-circle me-2 text-primary"></i> Details
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" asp-action="Edit" asp-route-id="@item.BusinessEntityId">
+                                                    <i class="bi bi-pencil-square me-2 text-warning"></i> Edit
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item text-danger" asp-action="Delete" asp-route-id="@item.BusinessEntityId">
+                                                    <i class="bi bi-trash me-2"></i> Delete
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mt-4">
+                <div class="text-muted small">
+                    Page @Model.PageIndex of @Model.TotalPages
+                </div>
+                <div>
+                    <a asp-action="Index"
+                       asp-route-pageNumber="@(Model.PageIndex - 1)"
+                       class="btn btn-outline-secondary btn-sm rounded-pill me-2 @(Model.HasPreviousPage ? "" : "disabled")">
+                        ← Previous
+                    </a>
+                    <a asp-action="Index"
+                       asp-route-pageNumber="@(Model.PageIndex + 1)"
+                       class="btn btn-outline-secondary btn-sm rounded-pill @(Model.HasNextPage ? "" : "disabled")">
+                        Next →
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    body {
+        background-color: #f7f9fc;
+    }
+
+    .table thead th {
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        font-size: 0.9rem;
+    }
+
+    .table td {
+        vertical-align: middle;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f3f6fb !important;
+    }
+
+    /* small icon button style for kebab */
+    .dropdown > .btn {
+        border: none;
+        background: transparent;
+        color: #6c757d;
+    }
+    .dropdown > .btn:focus {
+        box-shadow: none;
+    }
+
+    .btn-outline-secondary.disabled, .btn-outline-secondary:disabled {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+</style>
